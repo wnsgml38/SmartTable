@@ -1,16 +1,19 @@
 package com.vr;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.net.URL;
+import java.util.List;
 
-import javax.imageio.ImageIO;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.ibm.watson.developer_cloud.visual_recognition.v3.VisualRecognition;
 import com.ibm.watson.developer_cloud.visual_recognition.v3.model.ClassifyImagesOptions;
+import com.ibm.watson.developer_cloud.visual_recognition.v3.model.ImageClassification;
 import com.ibm.watson.developer_cloud.visual_recognition.v3.model.VisualClassification;
+import com.ibm.watson.developer_cloud.visual_recognition.v3.model.VisualClassifier;
+import com.ibm.watson.developer_cloud.visual_recognition.v3.model.VisualClassifier.VisualClass;
 
 	public class userClassifier {
 
@@ -23,8 +26,6 @@ import com.ibm.watson.developer_cloud.visual_recognition.v3.model.VisualClassifi
 		service.setApiKey(API_KEY);
 		
 		//runClassifier(service,"boots1.jpg");
-		//runClassifier(service,"oxford2.jpg");
-		//runClassifier(service,"sandal1.jpg");
 		runClassifierByUrl(service,"https://en.wikipedia.org/wiki/Tomato#/media/File:Farmer%27s_Market_I.jpg");//"http://cfile29.uf.tistory.com/image/141F0848513ACCED37E91A");
 	}
 	
@@ -41,6 +42,25 @@ import com.ibm.watson.developer_cloud.visual_recognition.v3.model.VisualClassifi
 		
 		System.out.println(result);
 		System.out.println("-------------------");
+		
+		List<ImageClassification> imgCls = result.getImages();
+		JsonArray classes = new JsonArray();
+		if(imgCls !=null){
+			for(ImageClassification ic : imgCls){
+				List<VisualClassifier> vc = ic.getClassifiers();
+				for(VisualClassifier v : vc){
+					List<VisualClass> vss = v.getClasses();
+					for(VisualClass one : vss){
+						JsonObject c = new JsonObject();
+						c.addProperty("name", one.getName());
+						c.addProperty("score", one.getScore());
+						classes.add(c);
+					}
+				}
+			}
+		}
+		String foodresult = classes.get(0).getAsJsonObject().get("name").toString(); 
+		System.out.println(foodresult);
 		
 		
 	}
